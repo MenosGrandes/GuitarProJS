@@ -16,27 +16,27 @@ class SongGP {
 		this.author = new String();
 	}
 }
-class SongGP1 extends SongGP{
+class SongGP1 extends SongGP {
 	constructor() {
 		super();
 	}
 }
-class SongGP2 extends SongGP1{
+class SongGP2 extends SongGP1 {
 	constructor() {
 		super();
 	}
 }
-class SongGP3 extends SongGP2{
+class SongGP3 extends SongGP2 {
 	constructor() {
 		super();
 		this.artist = new String();
 		this.copywright = new String();
 		this.writter = new String();
 		this.album = new String();
-		this.subArtist=new String();
+		this.subArtist = new String();
 	}
 }
-class SongGP4 extends SongGP3{
+class SongGP4 extends SongGP3 {
 
 	constructor() {
 		super();
@@ -44,14 +44,14 @@ class SongGP4 extends SongGP3{
 	}
 
 }
-class SongGP5 extends SongGP4{
+class SongGP5 extends SongGP4 {
 	constructor() {
 		super();
 
 	}
 
 }
-class SongGP6 extends SongGP5{}
+class SongGP6 extends SongGP5 {}
 /*To powinno być bardziej jak fabryka.
 Sprawdza wersje i do tej wersji wypluwa odpowiednia klase*/
 class GPLoader {
@@ -97,20 +97,17 @@ class GPLoader {
 		return string;
 
 	}
-	readInt()
-	{
-			var _int =this.fileContent.slice(this.beginCarret, this.beginCarret +3);
-				console.log(this.fileContent.charCodeAt(this.beginCarret));
-								console.log(this.fileContent.charCodeAt(this.beginCarret+1));
-				console.log(this.fileContent.charCodeAt(this.beginCarret+2));
-				console.log(this.fileContent.charCodeAt(this.beginCarret+3));
+	readInt() {
+		console.log("!!!!!!!!!!!!!");
 
-				    return ((_int[3] & 0xff) << 24) | ((_int[2] & 0xff) << 16)
-        | ((_int[1] & 0xff) << 8) | (_int[0] & 0xff);
+		return (
+			((this.fileContent.charCodeAt(this.beginCarret)) << 24)
+			 | ((this.fileContent.charCodeAt(this.beginCarret + 1)) << 16)
+			 | ((this.fileContent.charCodeAt(this.beginCarret + 2)) << 8)
+			 | ((this.fileContent.charCodeAt(this.beginCarret + 3))))
 
 	}
-	readByte()
-	{
+	readByte() {
 		return this.fileContent.charCodeAt(this.beginCarret);
 	}
 	CheckComptibility() {
@@ -160,30 +157,66 @@ class GPLoader {
 		return -1;
 	}
 	GP5Loader() {
-		
+
 		//console.log(this.fileContent);
-		
-		this.song=new SongGP5();
+
+		this.song = new SongGP5();
 		this.ommitBytes(10);
 		console.log("GuitarPro5");
 
 		this.song.name = this.readString();
 		this.ommitBytes(4);
+
 		this.song.subArtist = this.readString();
 		this.ommitBytes(4);
+
 		this.song.artist = this.readString();
 		this.ommitBytes(4);
+
 		this.song.album = this.readString();
 		this.ommitBytes(4);
+
 		this.song.author = this.readString();
 		this.ommitBytes(4);
+
+		this.readString();
+		this.ommitBytes(4);
+
 		this.song.copywright = this.readString();
 		this.ommitBytes(4);
+
 		this.song.writter = this.readString();
-		
-		console.log(this.readInt()); //notice
-				console.log("Triplets "+this.readByte()); //triplets
-				console.log("tempo "+this.readInt()); //tempo
+		this.ommitBytes(4);
+
+		this.readString();
+		this.ommitBytes(4);
+
+		//readInstructions
+
+		var count = this.readInt();
+		for (var i = 0; i < count; i++) {
+			this.readString();
+			this.ommitBytes(4);
+
+		}
+		console.log("Triplets" + this.readByte());
+		var lyricsTrack = this.readInt();
+
+		var lyricsTrack = this.readInt();
+		var lyrics = this.readString();
+		this.ommitBytes(4);
+
+		for (var i = 0; i < 4; i++) {
+			this.readInt();
+			this.readString();
+			this.ommitBytes(4);
+
+		}
+		this.ommitBytes(4);
+
+		console.log(this.readInt() + "Temp");
+		//console.log("Triplets "+this.readByte()); //triplets
+		//console.log("tempo "+this.readInt()); //tempo
 
 		console.log(this.song);
 	}
