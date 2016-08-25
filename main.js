@@ -10,21 +10,48 @@ class GPSettings {
 		this.DEFAULT_CHARSET = charset;
 	}
 }
-class Song {
+class SongGP {
 	constructor() {
-		this.album = new String();
-		this.artist = new String();
-		this.author = new String();
-		this.comments = new String();
-		this.copyright = new String();
-		this.date = new String();
-		//private List<TGMeasureHeader> measureHeaders = new ArrayList<TGMeasureHeader>();
 		this.name = new String();
-		//private List<TGTrack> tracks = new ArrayList<TGTrack>();
-		this.transcriber = new String();
-		this.writer = new String();
+		this.author = new String();
 	}
 }
+class SongGP1 extends SongGP{
+	constructor() {
+		super();
+	}
+}
+class SongGP2 extends SongGP1{
+	constructor() {
+		super();
+	}
+}
+class SongGP3 extends SongGP2{
+	constructor() {
+		super();
+		this.artist = new String();
+		this.copywright = new String();
+		this.writter = new String();
+		this.album = new String();
+		this.subArtist=new String();
+	}
+}
+class SongGP4 extends SongGP3{
+
+	constructor() {
+		super();
+
+	}
+
+}
+class SongGP5 extends SongGP4{
+	constructor() {
+		super();
+
+	}
+
+}
+class SongGP6 extends SongGP5{}
 /*To powinno być bardziej jak fabryka.
 Sprawdza wersje i do tej wersji wypluwa odpowiednia klase*/
 class GPLoader {
@@ -45,17 +72,62 @@ class GPLoader {
 		this.file = _file;
 		this.fileContent = null;
 		this.version = new String("");
+		this.beginCarret = 0;
+		this.endCarret = 0;
+
+		this.song = new SongGP();
 		this.ReadFile();
 
 	}
 
 	/*VERSION METHODS*/
-	readVersion() {
+	ommitBytes(bytes) {
+		this.beginCarret += bytes;
+	}
+	readString() {
+		//read size of string
+		var size = this.fileContent.charCodeAt(this.beginCarret);
+		//console.log("size " + size)
+		this.beginCarret++;
+		//read string
+		var string = this.fileContent.slice(this.beginCarret, this.beginCarret + size);
+		this.beginCarret += size;
+		//console.log("Carret At " + this.beginCarret + ":" + size);
 
-		if (this.version == "") {
-			this.version = this.fileContent.slice(1, this.fileContent.charCodeAt(0));
-			console.log(this.version);
+		return string;
+
+	}
+	readInt()
+	{
+			var _int =this.fileContent.slice(this.beginCarret, this.beginCarret +3);
+				console.log(this.fileContent.charCodeAt(this.beginCarret));
+								console.log(this.fileContent.charCodeAt(this.beginCarret+1));
+				console.log(this.fileContent.charCodeAt(this.beginCarret+2));
+				console.log(this.fileContent.charCodeAt(this.beginCarret+3));
+
+				    return ((_int[3] & 0xff) << 24) | ((_int[2] & 0xff) << 16)
+        | ((_int[1] & 0xff) << 8) | (_int[0] & 0xff);
+
+	}
+	readByte()
+	{
+		return this.fileContent.charCodeAt(this.beginCarret);
+	}
+	CheckComptibility() {
+
+		this.version = this.readString();
+		var version = this.isCompatibileWith();
+		switch (version) {
+		case 4:
+			this.GP4Loader();
+			break;
+		case 5:
+			this.GP5Loader();
+			break;
+		default:
+			console.log("UNDEFINED VERSION");
 		}
+		console.log(this.version);
 
 	}
 
@@ -64,20 +136,11 @@ class GPLoader {
 
 			var reader = new FileReader();
 			var that = this;
+
 			reader.onloadend = function (evt) {
 				that.fileContent = evt.target.result;
 				console.log("File LOADED");
-				that.readVersion()
-				var version = that.isCompatibileWith();
-				switch (version) {
-				case 4:
-					break;
-				case 5:
-					break;
-				default:
-					console.log("UNDEFINED");
-				}
-				console.log(version);
+				that.CheckComptibility();
 
 			};
 
@@ -96,13 +159,36 @@ class GPLoader {
 		}
 		return -1;
 	}
+	GP5Loader() {
+		
+		//console.log(this.fileContent);
+		
+		this.song=new SongGP5();
+		this.ommitBytes(10);
+		console.log("GuitarPro5");
 
-}
+		this.song.name = this.readString();
+		this.ommitBytes(4);
+		this.song.subArtist = this.readString();
+		this.ommitBytes(4);
+		this.song.artist = this.readString();
+		this.ommitBytes(4);
+		this.song.album = this.readString();
+		this.ommitBytes(4);
+		this.song.author = this.readString();
+		this.ommitBytes(4);
+		this.song.copywright = this.readString();
+		this.ommitBytes(4);
+		this.song.writter = this.readString();
+		
+		console.log(this.readInt()); //notice
+				console.log("Triplets "+this.readByte()); //triplets
+				console.log("tempo "+this.readInt()); //tempo
 
-class GP5Loader extends GPLoader {
+		console.log(this.song);
+	}
+	GP4Loader() {
+		this.GP5Loader();
 
-	constructor(_settings, _file) {
-
-		super(_settings, _file);
 	}
 }
