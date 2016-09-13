@@ -75,7 +75,7 @@ class GPLoader {
 		this.beginCarret = 0;
 		this.endCarret = 0;
 
-		this.song = new SongGP();
+		this.song = new SongGP5();
 		this.ReadFile();
 
 	}
@@ -84,21 +84,53 @@ class GPLoader {
 	ommitBytes(bytes) {
 		this.beginCarret += bytes;
 	}
-	readString() {
+	readStringAndReturnLength()
+	{
 		//read size of string
 		var size = this.fileContent.charCodeAt(this.beginCarret);
+		var sstring={s:"",length:0};
+		if(size>1){
 		//console.log("size " + size)
 		this.beginCarret++;
 		//read string
-		var string = this.fileContent.slice(this.beginCarret, this.beginCarret + size);
+		 sstring.s= this.fileContent.slice(this.beginCarret, this.beginCarret + size);
 		this.beginCarret += size;
 		//console.log("Carret At " + this.beginCarret + ":" + size);
-
+		}
+		else
+		{
+			this.beginCarret += 51;
+			sstring.s="NON"
+		}
+		sstring.length=size;
+		return sstring;
+	}
+	readString() {
+		//read size of string
+		var size = this.fileContent.charCodeAt(this.beginCarret);
+		
+		var string;
+		if(size>1){
+		//console.log("size " + size)
+		this.beginCarret++;
+		//read string
+		 string= this.fileContent.slice(this.beginCarret, this.beginCarret + size);
+		this.beginCarret += (size+4);
+		//console.log("Carret At " + this.beginCarret + ":" + size);
+		}
+		else // null string in GP4 01 00 00 00 00
+		{
+			this.beginCarret += 5;
+			string="NON"
+		}
+		console.log(string + " " + size 
+		+ " "+this.beginCarret);
+		
 		return string;
 
 	}
 	readInt() {
-		console.log("!!!!!!!!!!!!!");
+		//console.log("!!!!!!!!!!!!!");
 
 		return (
 			((this.fileContent.charCodeAt(this.beginCarret)) << 24)
@@ -111,8 +143,10 @@ class GPLoader {
 		return this.fileContent.charCodeAt(this.beginCarret);
 	}
 	CheckComptibility() {
-
-		this.version = this.readString();
+	var return_=this.readStringAndReturnLength();
+		this.version = return_.s;
+		console.log(return_.length);
+		this.ommitBytes(30-return_.length)
 		var version = this.isCompatibileWith();
 		switch (version) {
 		case 4:
@@ -161,44 +195,47 @@ class GPLoader {
 		//console.log(this.fileContent);
 
 		this.song = new SongGP5();
-		this.ommitBytes(10);
+		this.ommitBytes(4);
 		console.log("GuitarPro5");
 
-		this.song.name = this.readString();
-		this.ommitBytes(4);
+		this.song.name = this.readString(); //title
+		//this.ommitBytes(4);
 
-		this.song.subArtist = this.readString();
-		this.ommitBytes(4);
+		this.song.subArtist = this.readString(); //subtitle
+		//this.ommitBytes(4);
 
-		this.song.artist = this.readString();
-		this.ommitBytes(4);
+		this.song.artist = this.readString(); //artist
+		//this.ommitBytes(4);
 
-		this.song.album = this.readString();
-		this.ommitBytes(4);
+		this.song.album = this.readString(); //album
+		//this.ommitBytes(4);
 
-		this.song.author = this.readString();
-		this.ommitBytes(4);
+		this.song.author = this.readString(); //lyricist // EMPTY
+		//this.ommitBytes(4);
 
-		this.readString();
-		this.ommitBytes(4);
+		this.readString(); // composer
+		//this.ommitBytes(4);
 
-		this.song.copywright = this.readString();
-		this.ommitBytes(4);
+		this.song.copywright = this.readString(); //copywrigth
+		//this.ommitBytes(4);
 
-		this.song.writter = this.readString();
-		this.ommitBytes(4);
-
-		this.readString();
-		this.ommitBytes(4);
+		this.song.writter = this.readString(); //transcriber
+		//this.ommitBytes(4);
+		console.log("size  "+this.song.writter.length)
+		this.readString(); // instructions
+		//this.ommitBytes(4);
 
 		//readInstructions
-
+		console.log(this.beginCarret + "Begin caret");
 		var count = this.readInt();
+		console.log(count);
+		/*
 		for (var i = 0; i < count; i++) {
 			this.readString();
 			this.ommitBytes(4);
 
 		}
+		
 		console.log("Triplets" + this.readByte());
 		var lyricsTrack = this.readInt();
 
@@ -217,7 +254,7 @@ class GPLoader {
 		console.log(this.readInt() + "Temp");
 		//console.log("Triplets "+this.readByte()); //triplets
 		//console.log("tempo "+this.readInt()); //tempo
-
+*/
 		console.log(this.song);
 	}
 	GP4Loader() {
