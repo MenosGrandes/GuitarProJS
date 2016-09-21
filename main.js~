@@ -147,6 +147,7 @@ for(var g=0;g<4;g++)
 {
 tab.push(this.fileContent.charCodeAt(this.beginCarret+g).toString(16));
 
+
 }
 console.log("TAB "+tab);
 
